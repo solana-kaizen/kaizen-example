@@ -1,0 +1,29 @@
+[package]
+name = "example-wasm"
+version = "0.1.0"
+description = "Workflow Allocator Example WASM Bindings"
+license = "MIT/Apache-2.0"
+edition = "2018"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+solana-program = "1.14.1"
+workflow-allocator = { path = "../../workflow-allocator" }
+workflow-ux = { path = "../../workflow-ux" }
+# workflow-macros = { path = "../macros" }
+example = { path = "../lib" }
+
+borsh = {version = "0.9.3"}
+serde = { version = "1.0", features = ["derive"] }
+wasm-bindgen = { version = "0.2", features = ["serde-serialize"] }
+wasm-bindgen-futures = "0.4.29"
+js-sys = "0.3.56"
+async-std = "1.11.0"
+
+# [target.'cfg(target_arch = "wasm32")'.dependencies]
+getrandom = { version = "0.2", features = ["js"] }
+
+# [target.'cfg(target_arch = "bpf")'.dependencies]
+# getrandom = { version = "0.1.14", features = ["dummy"] }
