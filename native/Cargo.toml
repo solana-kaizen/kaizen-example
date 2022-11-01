@@ -6,6 +6,10 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-wasm-bindgen = "0.2.79"
 workflow-log = { path = "../../workflow-log" }
+workflow-allocator = { path = "../../workflow-allocator" }
+example = { path = "../lib" }
+workflow-core = { path = "../../workflow-core" }
+
+tokio = { version = "1.20.1", features = ['io-util','time'] }
 

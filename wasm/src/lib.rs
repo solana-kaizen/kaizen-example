@@ -29,9 +29,9 @@ pub async fn run_create(authority:Pubkey)->Result<Pubkey>{
 
 #[wasm_bindgen]
 pub async fn load(pubkey:Pubkey)->Result<()>{
-    if let Some(c_ref) = load_container::<ExampleHandlers>(&pubkey).await?{
+    if let Some(_c_ref) = load_container::<ExampleHandlers>(&pubkey).await?{
         //let data = c_ref.
-        log_trace!("c_ref: {:?}", c_ref);
+        //log_trace!("c_ref: {:?}", c_ref);
     }
     Ok(())
 }
