@@ -1,0 +1,20 @@
+[package]
+name = "example-simulator"
+version = "0.1.0"
+edition = "2021"
+
+
+[dependencies]
+workflow-allocator = { path = "../../workflow-allocator" }
+example = { path = "../lib" }
+workflow-core = { path = "../../workflow-core" }
+workflow-websocket = { path = "../../workflow-websocket" }
+workflow-rpc = { path = "../../workflow-rpc" }
+workflow-log = { path = "../../workflow-log" }
+async-trait = "0.1.56"
+tokio = { version = "1.20.1", features = ['io-util','time'] }
+clap = { version = "3.2.17", features = ["derive"] }
+thiserror = "1.0.32"
+inventory = "0.2.3"
+cfg-if = "1.0.0"
+

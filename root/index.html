@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<head>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Code+Pro">
+    <style>
+        html { scroll-behavior: smooth; }
+        body { font-family: "Source Code Pro"; font-size: 16px; }
+        #content { padding: 16px; }
+    </style>
+    <!--script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script-->
+    <script type="module">
+        import * as workflow from '/workflow/workflow.js';
+        const wasm = await workflow.default('/workflow/workflow_bg.wasm');
+        let solanaWeb3 = {};
+        console.log("wasm", wasm, "workflow:", workflow, "solanaWeb3:", solanaWeb3)
+        //let WalletReadyState = solanaWeb3.WalletReadyState;
+        workflow.bind(workflow, solanaWeb3, {
+            //PhantomWalletAdapter,
+            //WalletReadyState
+        });
+
+        let transport = new workflow.Transport("rpc://127.0.0.1:9393");
+
+        setTimeout(async ()=>{
+            await workflow.start_tests();
+        }, 1000)
+    </script>
+</head>
+<body>  
+    <div id="content"></div>
+</body>

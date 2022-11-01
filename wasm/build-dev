@@ -1,0 +1,1 @@
+wasm-pack build --dev --target web --out-name workflow --out-dir ../root/workflow ./

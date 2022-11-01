@@ -1,0 +1,8 @@
+
+
+[workspace]
+members = [
+    "native",
+    "wasm",
+    "simulator",
+]
