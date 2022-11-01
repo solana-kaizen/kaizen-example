@@ -1,6 +1,8 @@
 use workflow_allocator::prelude::*;
+#[allow(unused_imports)]
 use workflow_allocator::result::Result;
-use borsh::{BorshSerialize, BorshDeserialize};
+
+#[cfg(not(target_arch = "bpf"))]
 pub mod authority;
 
 pub mod program {
@@ -61,8 +63,11 @@ pub mod program {
     
 }
 
+#[cfg(not(target_arch = "bpf"))]
 pub mod client {
     use super::*;
+    use borsh::*;
+
     pub struct ExampleHandlerClient;
     declare_client!(super::program::ExampleHandlers, ExampleHandlerClient);
 

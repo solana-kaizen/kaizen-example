@@ -5,4 +5,5 @@ members = [
     "native",
     "wasm",
     "simulator",
+    "program",
 ]
