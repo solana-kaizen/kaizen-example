@@ -55,7 +55,7 @@ pub mod program {
         pub int64 : u64,
         pub int32 : u32,
         pub pubkey : Pubkey,
-        pub byte : u8,
+        pub int8 : u8,
     }
 
     // please note that this data structure is packed! (repr(packed))
@@ -67,7 +67,7 @@ pub mod program {
     #[derive(Meta, Clone, Copy)]
     #[repr(packed)]
     pub struct RecordData {
-        pub byte : u8,
+        pub int8 : u8,
         pub int32 : u32,
         pub int64 : u64,
         pub pubkey : Pubkey
@@ -77,7 +77,7 @@ pub mod program {
         fn into(self) -> RecordData {
             log_trace!("{:?}",self);
             RecordData {
-                byte: self.byte,
+                int8: self.int8,
                 int32: self.int32,
                 int64: self.int64,
                 pubkey: self.pubkey
@@ -105,7 +105,8 @@ pub mod program {
 
             // pre-calculate additional data needed for the account to avoid realloc()
             // of the account during the record insert operation
-            let extra_data = std::mem::size_of::<RecordData>() + args.msg.len();
+            let extra_data = std::mem::size_of::<RecordData>() + args.msg.as_bytes().len();
+            // let extra_data = 0;
             let container = ExampleContainer::try_allocate(
                 ctx,
                 &allocation_args,
@@ -135,6 +136,7 @@ pub mod program {
                 // alternatively, you can just insert
                 let record_data_src: RecordData = args.data.into();
 
+                let int8 = record_data_src.get_int8();
                 let int32 = record_data_src.get_int32();
                 let int64 = record_data_src.get_int64();
                 log_trace!("############### {} {}", int32, int64);
@@ -221,7 +223,7 @@ pub mod client {
         let data = program::CreationData {
             msg : "hello container".to_string(),
             data : program::RecordArgs {
-                byte : 1,
+                int8 : 1,
                 int32 : 2,
                 int64 : 3,
                 pubkey
@@ -232,18 +234,18 @@ pub mod client {
         tx.execute().await?;
 
         // load created container
-        let target_container = load_container::<program::ExampleContainer>(&target_account_pubkey)
+        let target_container = reload_container::<program::ExampleContainer>(&target_account_pubkey)
             .await?
             .expect("¯\\_(ツ)_/¯");
 
         let message = target_container.message.to_string();
         let record = target_container.records.try_get_at(0)?;
-        let byte = record.get_byte();
+        let int8 = record.get_int8();
         let int32 = record.get_int32();
         let int64 = record.get_int64();
         let incoming_pubkey = record.get_pubkey();
 
-        log_trace!("message: {message} byte: {byte} int32: {int32} int64: {int64} pubkey: {incoming_pubkey}");
+        log_trace!("message: {message} int8: {int8} int32: {int32} int64: {int64} pubkey: {incoming_pubkey}");
 
         assert_eq!(pubkey,incoming_pubkey);
 
