@@ -1,13 +1,6 @@
 use workflow_allocator::prelude::*;
-use wasm_bindgen::prelude::*;
-#[allow(unused_imports)]
-use workflow_allocator::result::Result;
-use std::str::FromStr;
 use borsh::*;
 use rand;
-
-#[cfg(not(target_os = "solana"))]
-pub mod authority;
 
 pub mod program {
     use workflow_allocator::container::Utf8String;
@@ -171,8 +164,10 @@ pub mod program {
 
 #[cfg(not(target_os = "solana"))]
 pub mod client {
+    use wasm_bindgen::prelude::*;
+    use workflow_allocator::result::Result;
     use super::*;
-
+    use std::str::FromStr;
     pub struct ExampleHandlerClient;
     declare_client!(program::ExampleHandler, ExampleHandlerClient);
 
@@ -278,6 +273,8 @@ pub mod client {
 #[cfg(test)]
 pub mod tests {
     use super::*;
+    use std::str::FromStr;
+    use workflow_allocator::result::Result;
 
     #[async_std::test]
     async fn example_test() -> Result<()> {

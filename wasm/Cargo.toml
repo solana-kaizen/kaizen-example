@@ -9,8 +9,6 @@ edition = "2018"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-wasm-bindgen = { version = "0.2", features = ["serde-serialize"] }
-wasm-bindgen-futures = "0.4.29"
 
 workflow-allocator = { path = "../../workflow-allocator" }
 example = { path = "../lib" }

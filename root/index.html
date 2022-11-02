@@ -9,11 +9,11 @@
     <!--script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script-->
     <script type="module">
         import * as example from '/example/example.js';
-        const wasm = await workflow.default('/example/example_bg.wasm');
+        const wasm = await example.default('/example/example_bg.wasm');
         let solanaWeb3 = {};
         console.log("wasm", wasm, "example:", example, "solanaWeb3:", solanaWeb3)
         //let WalletReadyState = solanaWeb3.WalletReadyState;
-        workflow.bind(example, solanaWeb3, {
+        example.bind(example, solanaWeb3, {
             //PhantomWalletAdapter,
             //WalletReadyState
         });
@@ -21,7 +21,7 @@
         let transport = new example.Transport("rpc://127.0.0.1:9393");
 
         setTimeout(async ()=>{
-            await example.start_tests();
+            await example.run_example();
         }, 1000)
     </script>
 </head>
