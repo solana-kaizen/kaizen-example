@@ -1,12 +1,5 @@
 use workflow_allocator::prelude::*;
-use wasm_bindgen::prelude::*;
-#[allow(unused_imports)]
-use workflow_allocator::result::Result;
-use std::str::FromStr;
 use borsh::*;
-
-#[cfg(not(target_os = "solana"))]
-pub mod authority;
 
 pub mod program {
     use workflow_allocator::container::Utf8String;
@@ -170,8 +163,10 @@ pub mod program {
 
 #[cfg(not(target_os = "solana"))]
 pub mod client {
+    use wasm_bindgen::prelude::*;
+    use workflow_allocator::result::Result;
     use super::*;
-
+    use std::str::FromStr;
     pub struct ExampleHandlerClient;
     declare_client!(program::ExampleHandler, ExampleHandlerClient);
 
@@ -250,8 +245,8 @@ pub mod client {
             .await?
             .expect("¯\\_(ツ)_/¯");
 
-log_trace!("RecordData: {}", std::mem::size_of::<program::RecordData>());
-            log_trace!("############### {:?}", container.message.segment.get_offset());
+        log_trace!("RecordData: {}", std::mem::size_of::<program::RecordData>());
+        log_trace!("############### {:?}", container.message.segment.get_offset());
 
         let message = container.message.to_string();
         let record = container.records.try_get_at(0)?;
@@ -272,6 +267,8 @@ log_trace!("RecordData: {}", std::mem::size_of::<program::RecordData>());
 #[cfg(test)]
 pub mod tests {
     use super::*;
+    use std::str::FromStr;
+    use workflow_allocator::result::Result;
 
     #[async_std::test]
     async fn example_test() -> Result<()> {
