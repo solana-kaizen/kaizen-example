@@ -57,31 +57,14 @@ cargo emanate sync
 cd workflow-allocator-example-dev/workflow-allocator-example
 ```
 
-### Deploying manually:
-
-```
-mkdir example
-cd example
-git clone https://github.com/workflow-rs/workflow-macro-tools
-git clone https://github.com/workflow-rs/workflow-websocket
-git clone https://github.com/workflow-rs/workflow-rpc
-git clone https://github.com/workflow-rs/workflow-core
-git clone https://github.com/workflow-rs/workflow-log
-git clone https://github.com/workflow-rs/workflow-wasm
-git clone https://github.com/workflow-rs/workflow-panic-hook
-git clone https://github.com/workflow-rs/workflow-async-trait
-git clone https://github.com/workflow-rs/workflow-allocator
-git clone https://github.com/workflow-rs/workflow-allocator-example
-cd workflow-allocator-example
-```
-
 ### Running
 
 Following this you can build subfolders as follows:
-* `native` - `cargo run`
-* `wasm` - `./build`
-* `program` - `cargo build-bpf`
-* `simulator` - `cargo run`
+* `native` (native client execution) - `cargo run`
+* `wasm` (web-browser client; see below) - `./build`
+* `program` (program for solana deployment) - `cargo build-bpf`
+* `simulator` (simulator server) - `cargo run`
+* `lib` (unit tests) - `cargo test example_test -- --nocapture`
 
 To access WASM target, you can use any web server from the `root` folder.
 
