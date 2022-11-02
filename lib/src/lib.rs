@@ -99,7 +99,6 @@ pub mod program {
             // pre-calculate additional data needed for the account to avoid realloc()
             // of the account during the record insert operation
             let extra_data = std::mem::size_of::<RecordData>() + args.msg.as_bytes().len();
-            // let extra_data = 0;
             let container = ExampleContainer::try_allocate(
                 ctx,
                 &allocation_args,
@@ -123,21 +122,15 @@ pub mod program {
                 // since we pre-calculated record allocation at container creation phase
                 // we can call try_allocate() that will skip realloc and return mut reference
                 // to what would be a newly allocated element
-                // let record_data_dst = container.records.try_allocate(false)?;
-                // *record_data_dst = args.data.into();
+                let record_data_dst = container.records.try_allocate(false)?;
+                *record_data_dst = args.data.into();
 
                 // alternatively, you can just insert
-                let record_data_src: RecordData = args.data.into();
-
-                let int8 = record_data_src.get_int8();
-                let int32 = record_data_src.get_int32();
-                let int64 = record_data_src.get_int64();
-                log_trace!("############### {} {}", int32, int64);
-                log_trace!("############### {:?}", container.message.segment);
-                log_trace!("############### {:?}", container.message.segment.get_offset());
-                log_trace!("############### {} {} {}", int8, int32, int64);
-                container.records.try_insert(&record_data_src)?;
+                // let record_data_src: RecordData = args.data.into();
+                // container.records.try_insert(&record_data_src)?;
                 container.message.store(&args.msg)?;
+
+                ctx.sync_rent(container.account(), &RentCollector::default())?;
             }
 
             Ok(())
@@ -236,9 +229,6 @@ pub mod client {
         let container = reload_container::<program::ExampleContainer>(&target_account_pubkey)
             .await?
             .expect("¯\\_(ツ)_/¯");
-
-        // log_trace!("RecordData: {}", std::mem::size_of::<program::RecordData>());
-        // log_trace!("############### {:?}", container.message.segment.get_offset());
 
         let message = container.message.to_string();
         let record = container.records.try_get_at(0)?;
