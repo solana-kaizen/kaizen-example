@@ -85,10 +85,19 @@ pub mod program {
         }
     }
 
+
+    // #[derive(Meta, Copy, Clone)]
+    // #[repr(packed)]
+    // pub struct ContainerMeta {
+    //     version : u32,
+    // }
+    
+
     #[container(ContainerTypes::ExampleContainer)]
     pub struct ExampleContainer<'info,'refs> {
-        pub records : Array<RecordData,'info,'refs>,
+        // pub meta : RefCell<&'info mut ContainerMeta>,
         pub message : Utf8String<'info,'refs>,
+        pub records : Array<RecordData,'info,'refs>,
     }
 
     impl<'info,'refs> ExampleContainer<'info,'refs> {
@@ -140,6 +149,8 @@ pub mod program {
                 let int32 = record_data_src.get_int32();
                 let int64 = record_data_src.get_int64();
                 log_trace!("############### {} {}", int32, int64);
+                log_trace!("############### {:?}", container.message.segment);
+                log_trace!("############### {:?}", container.message.segment.get_offset());
                 container.records.try_insert(&record_data_src)?;
                 container.message.store(&args.msg)?;
             }
@@ -234,12 +245,15 @@ pub mod client {
         tx.execute().await?;
 
         // load created container
-        let target_container = reload_container::<program::ExampleContainer>(&target_account_pubkey)
+        let container = reload_container::<program::ExampleContainer>(&target_account_pubkey)
             .await?
             .expect("¯\\_(ツ)_/¯");
 
-        let message = target_container.message.to_string();
-        let record = target_container.records.try_get_at(0)?;
+log_trace!("RecordData: {}", std::mem::size_of::<program::RecordData>());
+            log_trace!("############### {:?}", container.message.segment.get_offset());
+
+        let message = container.message.to_string();
+        let record = container.records.try_get_at(0)?;
         let int8 = record.get_int8();
         let int32 = record.get_int32();
         let int64 = record.get_int64();
