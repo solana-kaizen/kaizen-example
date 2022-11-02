@@ -15,18 +15,21 @@ This example contains the following folders:
 ## Prerequisites:
 
 Rust - https://www.rust-lang.org/
+
 To install:
 ```
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```
 
 Wasm Pack - https://rustwasm.github.io/wasm-pack/
+
 To install:
 ```
 curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
 ```
 
 Solana Tool Suite - https://docs.solana.com/cli/install-solana-cli-tools
+
 To install:
 ```
 sh -c "$(curl -sSfL https://release.solana.com/v1.14.7/install)"
@@ -88,4 +91,4 @@ cargo install simple-http-server
 cd root
 simple-http-server
 ```
-Following that, access http://localhost:8000/index.html
+Following that, access http://localhost:8000/index.html and open the browser developer console to see application output logs.
