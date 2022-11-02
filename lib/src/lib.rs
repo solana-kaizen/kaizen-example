@@ -147,7 +147,7 @@ pub mod program {
 #[cfg(not(target_os = "solana"))]
 pub mod client {
     use wasm_bindgen::prelude::*;
-    use workflow_allocator::result::Result;
+    use workflow_allocator::{utils, result::Result};
     use super::*;
     use std::str::FromStr;
     pub struct ExampleHandlerClient;
@@ -205,8 +205,20 @@ pub mod client {
 
     #[wasm_bindgen]
     pub async fn run_example() -> Result<()> {
+        let transport = Transport::global()?;
+        if let Some(emulator) = transport.emulator() {
+            let authority = Pubkey::from_str("42bML5qB3WkMwfa2cosypjUrN7F2PLQm4qhxBdRDyW7f")?;
+            transport.set_custom_authority(
+                Some(authority)
+            )?;
+            emulator.fund(
+                &authority,
+                &Pubkey::default(),
+                utils::sol_to_lamports(500.0)
+            ).await?;
+        }
 
-        let authority = Transport::global()?.get_authority_pubkey()?;
+        let authority = transport.get_authority_pubkey()?;
 
         let tx = client::ExampleHandlerClient::run_test(&authority).await?;
         tx.execute().await?;
