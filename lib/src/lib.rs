@@ -2,7 +2,7 @@ use workflow_allocator::prelude::*;
 #[allow(unused_imports)]
 use workflow_allocator::result::Result;
 
-#[cfg(not(target_arch = "bpf"))]
+#[cfg(not(target_os = "solana"))]
 pub mod authority;
 
 pub mod program {
@@ -63,7 +63,7 @@ pub mod program {
     
 }
 
-#[cfg(not(target_arch = "bpf"))]
+#[cfg(not(target_os = "solana"))]
 pub mod client {
     use super::*;
     use borsh::*;
