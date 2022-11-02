@@ -4,6 +4,7 @@ use wasm_bindgen::prelude::*;
 use workflow_allocator::result::Result;
 use std::str::FromStr;
 use borsh::*;
+use rand;
 
 #[cfg(not(target_os = "solana"))]
 pub mod authority;
@@ -204,9 +205,11 @@ pub mod client {
             data : &program::CreationData
         ) -> Result<TransactionList> {
     
+            let random_seed = rand::random::<[u8; 8]>();
             let builder = Self::execution_context_for(program::ExampleContainer::create)
                 .with_authority(authority)
-                .with_account_templates(1)
+                .with_account_templates_with_custom_suffixes(&[&random_seed])
+                // .with_account_templates(1)
                 .with_instruction_data(&data.try_to_vec()?)
                 .seal()?;
     
@@ -250,8 +253,8 @@ pub mod client {
             .await?
             .expect("¯\\_(ツ)_/¯");
 
-log_trace!("RecordData: {}", std::mem::size_of::<program::RecordData>());
-            log_trace!("############### {:?}", container.message.segment.get_offset());
+        // log_trace!("RecordData: {}", std::mem::size_of::<program::RecordData>());
+        // log_trace!("############### {:?}", container.message.segment.get_offset());
 
         let message = container.message.to_string();
         let record = container.records.try_get_at(0)?;
@@ -260,8 +263,11 @@ log_trace!("RecordData: {}", std::mem::size_of::<program::RecordData>());
         let int64 = record.get_int64();
         let incoming_pubkey = record.get_pubkey();
 
-        log_trace!("message: {message} int8: {int8} int32: {int32} int64: {int64} pubkey: {incoming_pubkey}");
+        log_trace!("container data - message: {message} int8: {int8} int32: {int32} int64: {int64} pubkey: {incoming_pubkey}");
 
+        assert_eq!(int8,1);
+        assert_eq!(int32,2);
+        assert_eq!(int64,3);
         assert_eq!(pubkey,incoming_pubkey);
 
         Ok(())
