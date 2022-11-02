@@ -1,6 +1,8 @@
 use workflow_allocator::prelude::*;
+use wasm_bindgen::prelude::*;
 #[allow(unused_imports)]
 use workflow_allocator::result::Result;
+use std::str::FromStr;
 use borsh::*;
 
 #[cfg(not(target_os = "solana"))]
@@ -48,7 +50,7 @@ pub mod program {
         pub data : RecordArgs,
     }
 
-    #[derive(Clone, Copy, BorshSerialize, BorshDeserialize)]
+    #[derive(Debug, Clone, Copy, BorshSerialize, BorshDeserialize)]
     pub struct RecordArgs {
         pub int64 : u64,
         pub int32 : u32,
@@ -73,6 +75,7 @@ pub mod program {
 
     impl Into<RecordData> for RecordArgs {
         fn into(self) -> RecordData {
+            log_trace!("{:?}",self);
             RecordData {
                 byte: self.byte,
                 int32: self.int32,
@@ -126,12 +129,16 @@ pub mod program {
                 // since we pre-calculated record allocation at container creation phase
                 // we can call try_allocate() that will skip realloc and return mut reference
                 // to what would be a newly allocated element
-                let record_data_dst = container.records.try_allocate(false)?;
-                *record_data_dst = args.data.into();
+                // let record_data_dst = container.records.try_allocate(false)?;
+                // *record_data_dst = args.data.into();
 
                 // alternatively, you can just insert
-                // let record_data_src: RecordData = args.data.into();
-                // container.records.try_insert(&record_data_src)?;
+                let record_data_src: RecordData = args.data.into();
+
+                let int32 = record_data_src.get_int32();
+                let int64 = record_data_src.get_int64();
+                log_trace!("############### {} {}", int32, int64);
+                container.records.try_insert(&record_data_src)?;
                 container.message.store(&args.msg)?;
             }
 
@@ -199,27 +206,13 @@ pub mod client {
     
             Ok(TransactionList::new(vec![transaction]))
         }
-    
-
     }
-}
 
-#[cfg(test)]
-pub mod tests {
-    use super::*;
-    use std::str::FromStr;
 
-    #[async_std::test]
-    async fn example_test() -> Result<()> {
-        workflow_allocator::init()?;
+    #[wasm_bindgen]
+    pub async fn run_example() -> Result<()> {
 
-        let transport = Transport::try_new_for_unit_tests(
-            crate::program_id(),
-            Some(Pubkey::from_str("42bML5qB3WkMwfa2cosypjUrN7F2PLQm4qhxBdRDyW7f")?),
-            TransportConfig::default()
-        ).await?;
-
-        let authority = transport.get_authority_pubkey()?;
+        let authority = Transport::global()?.get_authority_pubkey()?;
 
         let tx = client::ExampleHandlerClient::run_test(&authority).await?;
         tx.execute().await?;
@@ -248,10 +241,32 @@ pub mod tests {
         let byte = record.get_byte();
         let int32 = record.get_int32();
         let int64 = record.get_int64();
-        let pubkey = record.get_pubkey();
+        let incoming_pubkey = record.get_pubkey();
 
-        log_trace!("message: {message} byte: {byte} int32: {int32} int64: {int64} pubkey: {pubkey}");
+        log_trace!("message: {message} byte: {byte} int32: {int32} int64: {int64} pubkey: {incoming_pubkey}");
 
+        assert_eq!(pubkey,incoming_pubkey);
+
+        Ok(())
+    }
+
+}
+
+#[cfg(test)]
+pub mod tests {
+    use super::*;
+
+    #[async_std::test]
+    async fn example_test() -> Result<()> {
+        workflow_allocator::init()?;
+
+        Transport::try_new_for_unit_tests(
+            crate::program_id(),
+            Some(Pubkey::from_str("42bML5qB3WkMwfa2cosypjUrN7F2PLQm4qhxBdRDyW7f")?),
+            TransportConfig::default()
+        ).await?;
+
+        client::run_example().await?;
 
         Ok(())
     }
