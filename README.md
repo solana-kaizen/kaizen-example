@@ -75,3 +75,8 @@ cd root
 simple-http-server
 ```
 Following that, access http://localhost:8000/index.html and open the browser developer console to see application output logs.
+
+Please note: Current implementation of the example, does not connect to the in-browser wallet, such as phantom
+as this example was quickly put together to demonstrate the functionality of the framework, it does not have 
+any user interface.  The example of interfacing with wallet adapters will be done at a later date.
+
