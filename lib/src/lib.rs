@@ -1,63 +1,147 @@
 use workflow_allocator::prelude::*;
 #[allow(unused_imports)]
 use workflow_allocator::result::Result;
+use borsh::*;
 
 #[cfg(not(target_os = "solana"))]
 pub mod authority;
 
 pub mod program {
+    use workflow_allocator::container::Utf8String;
+
     use super::*;
 
-    pub enum ContainerTypes{
-        ExampleHandlers = 1,
-        ExampleContainer
-    }
-
-    #[container(ContainerTypes::ExampleHandlers)]
-    pub struct ExampleHandlers<'info,'refs>{
-
-    }
+    // simple program handler with test function
+    pub struct ExampleHandler;
     
-    impl<'info,'refs> ExampleHandlers<'info,'refs>{
+    impl ExampleHandler {
 
         pub fn test(_ctx: &ContextReference) -> ProgramResult {
-            log_trace!("Handlers: hello");
-            Ok(())
-        }
-        pub fn create(_ctx: &ContextReference) -> ProgramResult {
-            log_trace!("Handlers: hello create ");
+            log_trace!("hello handler test");
             Ok(())
         }
     }
 
-    declare_handlers! (ExampleHandlers::<'info,'refs>, [
-        ExampleHandlers::test,
-        ExampleHandlers::create,
+    // declare this struct as a handler
+    // ...declare test function
+    // this macro builds a small function table
+    // that is accessible program and client-side
+    declare_handlers! (ExampleHandler, [
+        ExampleHandler::test,
     ]);
     
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    
+    // simple container example
+    // this example uses a container, but also
+    // demonstrates how static methods on any
+    // struct can be used as handler endpoints
+
+    pub enum ContainerTypes{
+        ExampleContainer = 1
+    }
+
+    // data passed to the create() function
+    #[derive(Clone, BorshSerialize, BorshDeserialize)]
+    pub struct CreationData {
+        pub msg: String,
+        pub data : RecordArgs,
+    }
+
+    #[derive(Clone, Copy, BorshSerialize, BorshDeserialize)]
+    pub struct RecordArgs {
+        pub int64 : u64,
+        pub int32 : u32,
+        pub pubkey : Pubkey,
+        pub byte : u8,
+    }
+
+    // please note that this data structure is packed! (repr(packed))
+    // as such, you can not derive Debug trait
+    // however, Meta trait provided by workflow-allocator
+    // creates unaligned property access functions
+    // such as x.get_byte() and x.set_int64()
+    // this is needed only if the structure is unaligned
+    #[derive(Meta, Clone, Copy)]
+    #[repr(packed)]
+    pub struct RecordData {
+        pub byte : u8,
+        pub int32 : u32,
+        pub int64 : u64,
+        pub pubkey : Pubkey
+    }
+
+    impl Into<RecordData> for RecordArgs {
+        fn into(self) -> RecordData {
+            RecordData {
+                byte: self.byte,
+                int32: self.int32,
+                int64: self.int64,
+                pubkey: self.pubkey
+            }
+        }
+    }
 
     #[container(ContainerTypes::ExampleContainer)]
     pub struct ExampleContainer<'info,'refs> {
-
+        pub records : Array<RecordData,'info,'refs>,
+        pub message : Utf8String<'info,'refs>,
     }
 
     impl<'info,'refs> ExampleContainer<'info,'refs> {
 
         pub fn test(_ctx: &ContextReference) -> ProgramResult {
-            log_trace!("hello");
+            log_trace!("hello container test!");
             Ok(())
         }
 
-        pub fn create(_ctx: &ContextReference) -> ProgramResult {
-            log_trace!("hello create");
+        pub fn create(ctx: &ContextReference) -> ProgramResult {
+            
+            let args = CreationData::try_from_slice(ctx.instruction_data)?;
+            let allocation_args = AccountAllocationArgs::default();
+
+            // pre-calculate additional data needed for the account to avoid realloc()
+            // of the account during the record insert operation
+            let extra_data = std::mem::size_of::<RecordData>() + args.msg.len();
+            let container = ExampleContainer::try_allocate(
+                ctx,
+                &allocation_args,
+                extra_data
+            )?;
+
+            // following operations are unsafe as they may result in segment resizing
+            // since various APIs offer direct slice access to segment data, resizing
+            // may result in shifts of underlying data.  Avoid retaining slices for
+            // extended period of times.  On their own, these functions are perfectly safe!
+            //
+            // Example of problematic code:
+            //      ... assume two arrays sets records_a (first) and records_b (second)
+            //      let slice_b = container.records_b.as_slice(); <-- get slice from records_b
+            //      container.records_a.try_insert(&args.data)?;  <-- insert into records_a
+            //      let value_from_b = slice_b[0]; <-- may point to invalid data
+            //      ... this can also be avoided by resizing records_a before taking it's slice
+            //
+            unsafe {
+                
+                // since we pre-calculated record allocation at container creation phase
+                // we can call try_allocate() that will skip realloc and return mut reference
+                // to what would be a newly allocated element
+                let record_data_dst = container.records.try_allocate(false)?;
+                *record_data_dst = args.data.into();
+
+                // alternatively, you can just insert
+                // let record_data_src: RecordData = args.data.into();
+                // container.records.try_insert(&record_data_src)?;
+                container.message.store(&args.msg)?;
+            }
+
             Ok(())
         }
     }
 
-
     declare_handlers! (ExampleContainer::<'info,'refs>, [
         ExampleContainer::test,
+        ExampleContainer::create,
     ]);
     
     
@@ -66,27 +150,19 @@ pub mod program {
 #[cfg(not(target_os = "solana"))]
 pub mod client {
     use super::*;
-    use borsh::*;
 
     pub struct ExampleHandlerClient;
-    declare_client!(super::program::ExampleHandlers, ExampleHandlerClient);
-
-    #[derive(Debug, Clone, BorshSerialize, BorshDeserialize, PartialEq, Eq)]
-    pub struct ExampleData {
-        pub msg: String
-    }
+    declare_client!(program::ExampleHandler, ExampleHandlerClient);
 
     impl ExampleHandlerClient {
 
-        pub fn run_test(
+        pub async fn run_test(
             authority:&Pubkey,
-            //identity:&Pubkey
         ) -> Result<TransactionList> {
             let builder = ExampleHandlerClient::execution_context_for(
-                program::ExampleHandlers::test
+                program::ExampleHandler::test
             )
                 .with_authority(authority)
-                //.with_identity(identity)
                 .seal()?;
 
             let transaction = Transaction::new_without_accounts(
@@ -96,17 +172,19 @@ pub mod client {
 
             Ok(TransactionList::new(vec![transaction]))
         }
+    }
 
+    pub struct ExampleContainerClient;
+    declare_client!(program::ExampleContainer, ExampleContainerClient);
+
+    impl ExampleContainerClient {
         pub async fn create(
-            //user : &User,
             authority:&Pubkey,
-            data : &ExampleData
+            data : &program::CreationData
         ) -> Result<TransactionList> {
     
-            let builder = Self::execution_context_for(program::ExampleHandlers::create)
-                //.with_user(user.into())
+            let builder = Self::execution_context_for(program::ExampleContainer::create)
                 .with_authority(authority)
-                //.with_identity_collections(&[(true, program::ContainerTypes::ExampleHandlers as u32)]).await?
                 .with_account_templates(1)
                 .with_instruction_data(&data.try_to_vec()?)
                 .seal()?;
@@ -129,10 +207,51 @@ pub mod client {
 #[cfg(test)]
 pub mod tests {
     use super::*;
+    use std::str::FromStr;
 
     #[async_std::test]
     async fn example_test() -> Result<()> {
         workflow_allocator::init()?;
+
+        let transport = Transport::try_new_for_unit_tests(
+            crate::program_id(),
+            Some(Pubkey::from_str("42bML5qB3WkMwfa2cosypjUrN7F2PLQm4qhxBdRDyW7f")?),
+            TransportConfig::default()
+        ).await?;
+
+        let authority = transport.get_authority_pubkey()?;
+
+        let tx = client::ExampleHandlerClient::run_test(&authority).await?;
+        tx.execute().await?;
+
+        let pubkey = Pubkey::from_str("9ZNTfG4NyQgxy2SWjSiQoUyBPEvXT2xo7fKc5hPYYJ7b")?;
+        let data = program::CreationData {
+            msg : "hello container".to_string(),
+            data : program::RecordArgs {
+                byte : 1,
+                int32 : 2,
+                int64 : 3,
+                pubkey
+            }
+        };
+        let tx = client::ExampleContainerClient::create(&authority, &data).await?;
+        let target_account_pubkey = tx.target_account()?;
+        tx.execute().await?;
+
+        // load created container
+        let target_container = load_container::<program::ExampleContainer>(&target_account_pubkey)
+            .await?
+            .expect("¯\\_(ツ)_/¯");
+
+        let message = target_container.message.to_string();
+        let record = target_container.records.try_get_at(0)?;
+        let byte = record.get_byte();
+        let int32 = record.get_int32();
+        let int64 = record.get_int64();
+        let pubkey = record.get_pubkey();
+
+        log_trace!("message: {message} byte: {byte} int32: {int32} int64: {int64} pubkey: {pubkey}");
+
 
         Ok(())
     }
@@ -141,6 +260,7 @@ pub mod tests {
 
 
 declare_program!("example", "F9SsGPgxpBdTyiZA41X1HYLR5QtcXnNBvhoE374DWhjg",[
-    program::ExampleHandlers
+    program::ExampleHandler,
+    program::ExampleContainer,
 ]); 
 
