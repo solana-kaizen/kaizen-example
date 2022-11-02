@@ -78,17 +78,8 @@ pub mod program {
         }
     }
 
-
-    // #[derive(Meta, Copy, Clone)]
-    // #[repr(packed)]
-    // pub struct ContainerMeta {
-    //     version : u32,
-    // }
-    
-
     #[container(ContainerTypes::ExampleContainer)]
     pub struct ExampleContainer<'info,'refs> {
-        // pub meta : RefCell<&'info mut ContainerMeta>,
         pub message : Utf8String<'info,'refs>,
         pub records : Array<RecordData,'info,'refs>,
     }
@@ -158,7 +149,6 @@ pub mod program {
         ExampleContainer::create,
     ]);
     
-    
 }
 
 #[cfg(not(target_os = "solana"))]
@@ -219,7 +209,6 @@ pub mod client {
             Ok(TransactionList::new(vec![transaction]))
         }
     }
-
 
     #[wasm_bindgen]
     pub async fn run_example() -> Result<()> {
