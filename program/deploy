@@ -1,0 +1,1 @@
+solana program deploy ../target/deploy/example_program.so --program-id ../keys/keypair.json
