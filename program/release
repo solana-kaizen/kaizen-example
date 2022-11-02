@@ -1,0 +1,8 @@
+cargo build-bpf
+
+if [ $? -eq 0 ]; then
+    echo "build ok, deploying ..."
+    solana program deploy ../target/deploy/example_program.so --program-id ../keys/keypair.json
+else
+    echo "build failure ..."
+fi

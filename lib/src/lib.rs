@@ -139,7 +139,7 @@ pub mod program {
                 let int8 = record_data_src.get_int8();
                 let int32 = record_data_src.get_int32();
                 let int64 = record_data_src.get_int64();
-                log_trace!("############### {} {}", int32, int64);
+                log_trace!("############### {} {} {}", int8, int32, int64);
                 container.records.try_insert(&record_data_src)?;
                 container.message.store(&args.msg)?;
             }
@@ -276,7 +276,7 @@ pub mod tests {
 }
 
 
-declare_program!("example", "F9SsGPgxpBdTyiZA41X1HYLR5QtcXnNBvhoE374DWhjg",[
+declare_program!("example", "5UAQGzYRWKEgdbpZCqoUjKDKiWpNbHeataWknRpvswEH",[
     program::ExampleHandler,
     program::ExampleContainer,
 ]); 
