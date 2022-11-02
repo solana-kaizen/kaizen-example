@@ -1,6 +1,5 @@
 use workflow_allocator::prelude::*;
 use borsh::*;
-use rand;
 
 pub mod program {
     use workflow_allocator::container::Utf8String;
@@ -159,6 +158,7 @@ pub mod client {
     use super::*;
     use std::str::FromStr;
     pub struct ExampleHandlerClient;
+    use rand;
     declare_client!(program::ExampleHandler, ExampleHandlerClient);
 
     impl ExampleHandlerClient {
