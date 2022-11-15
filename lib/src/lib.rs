@@ -1,8 +1,8 @@
-use workflow_allocator::prelude::*;
+use kaizen::prelude::*;
 use borsh::*;
 
 pub mod program {
-    use workflow_allocator::container::Utf8String;
+    use kaizen::container::Utf8String;
 
     use super::*;
 
@@ -147,7 +147,7 @@ pub mod program {
 #[cfg(not(target_os = "solana"))]
 pub mod client {
     use wasm_bindgen::prelude::*;
-    use workflow_allocator::{utils, result::Result};
+    use kaizen::{utils, result::Result};
     use super::*;
     use std::str::FromStr;
     pub struct ExampleHandlerClient;
@@ -284,7 +284,7 @@ pub mod client {
 pub mod tests {
     use super::*;
     use std::str::FromStr;
-    use workflow_allocator::result::Result;
+    use kaizen::result::Result;
 
     #[async_std::test]
     async fn example_test() -> Result<()> {
@@ -294,7 +294,7 @@ pub mod tests {
         // (you can have multiple entry points, just make sure to expose only 
         // one to the program) and container registry maps container lookup tables
         // these are done differently in native and wasm.
-        workflow_allocator::init()?;
+        kaizen::init()?;
 
         //
         // each client (native, wasm) creates its own variant of transport

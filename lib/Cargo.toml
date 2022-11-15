@@ -11,7 +11,7 @@ crate-type = ["cdylib", "lib"]
 solana-program = "1.14.1"
 workflow-log = { path = "../../workflow-log" }
 workflow-core = { path = "../../workflow-core" }
-workflow-allocator = { path = "../../workflow-allocator" }
+kaizen = { path = "../../kaizen" }
 wasm-bindgen = "0.2.79"
 wasm-bindgen-futures = "0.4.29"
 borsh = "0.9.1"

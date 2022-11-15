@@ -6,8 +6,8 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+kaizen = { path = "../../kaizen" }
 workflow-log = { path = "../../workflow-log" }
-workflow-allocator = { path = "../../workflow-allocator" }
 example = { path = "../lib" }
 workflow-core = { path = "../../workflow-core" }
 

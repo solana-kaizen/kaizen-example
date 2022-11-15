@@ -10,5 +10,5 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 
-workflow-allocator = { path = "../../workflow-allocator" }
+kaizen = { path = "../../kaizen" }
 example = { path = "../lib" }

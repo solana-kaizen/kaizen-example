@@ -1,6 +1,6 @@
-# workflow-allocator-example
+# Kaizen Example
 
-This is a simple example demonstrating the Solana [Workflow Allocator](https://github.com/workflow-rs/workflow-allocator) framework.
+This is a simple example demonstrating the [Solana Kaizen](https://github.com/solana-kaizen/kaizen) framework.
 
 This example contains the following folders:
 
@@ -39,7 +39,7 @@ sh -c "$(curl -sSfL https://release.solana.com/v1.14.7/install)"
 
 IMPORTANT:
 
-The dependencies of Workflow Allocator are not currently published to crates.io or are
+The dependencies of Solana Kaizen are not currently published to crates.io or are
 out of date.  To setup a development environment, you need to clone its dependencies
 manually or use [Emanator](https://github.com/aspectron/cargo-emanate)
 
@@ -51,10 +51,10 @@ To deploy this example using Emanator, you need to have a functional command-lin
 
 ```
 cargo install cargo-emanate
-git clone https://github.com/workflow-rs/workflow-allocator-example-dev
-cd workflow-allocator-example-dev
+git clone https://github.com/solana-kaizen/solana-kaizen-example-dev
+cd solana-kaizen-example-dev
 cargo emanate sync
-cd workflow-allocator-example-dev/workflow-allocator-example
+cd solana-kaizen-example-dev/solana-kaizen-example
 ```
 
 ### Running

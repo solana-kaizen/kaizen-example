@@ -4,12 +4,12 @@ cfg_if! {
     if #[cfg(not(target_arch = "wasm32"))] {
 
         use std::sync::Arc;
-        use workflow_allocator::prelude::{AccountData, AccountDataReference};
+        use kaizen::prelude::{AccountData, AccountDataReference};
         use workflow_log::*;
         use workflow_rpc::asynchronous::server::*;
-        use workflow_allocator::store::*;
-        use workflow_allocator::generate_random_pubkey;
-        use workflow_allocator::emulator::server::Server;
+        use kaizen::store::*;
+        use kaizen::generate_random_pubkey;
+        use kaizen::emulator::server::Server;
         use thiserror::Error;
         use clap::{Parser,Subcommand};
         
@@ -23,8 +23,8 @@ cfg_if! {
             IoError(#[from] std::io::Error),
         }
         
-        impl From<workflow_allocator::error::Error> for Error {
-            fn from(error: workflow_allocator::error::Error) -> Self {
+        impl From<kaizen::error::Error> for Error {
+            fn from(error: kaizen::error::Error) -> Self {
                 Error::WorkflowAllocator(error.to_string())
             }
         }
@@ -68,9 +68,9 @@ cfg_if! {
                     println!();
                     example::init();
                     // ~~~~~~~~~~~~~~~~~~~~~~~~~
-                    workflow_allocator::init()?;
-                    workflow_allocator::program::registry::list_entrypoints()?;
-                    workflow_allocator::container::registry::list_containers()?;
+                    kaizen::init()?;
+                    kaizen::program::registry::list_entrypoints()?;
+                    kaizen::container::registry::list_containers()?;
                     // ~~~~~~~~~~~~~~~~~~~~~~~~~
                     println!();
                     
@@ -98,7 +98,7 @@ cfg_if! {
                 },
                 Action::List => {
                     example::init();
-                    workflow_allocator::init()?;
+                    kaizen::init()?;
                     let store = FileStore::try_new()?;
                     store.list().await?.to_log();
                 }

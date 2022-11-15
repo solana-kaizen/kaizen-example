@@ -5,7 +5,7 @@ edition = "2021"
 
 
 [dependencies]
-workflow-allocator = { path = "../../workflow-allocator" }
+kaizen = { path = "../../kaizen" }
 example = { path = "../lib" }
 workflow-core = { path = "../../workflow-core" }
 workflow-websocket = { path = "../../workflow-websocket" }

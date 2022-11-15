@@ -1,6 +1,6 @@
 
-use workflow_allocator::prelude::*;
-use workflow_allocator::result::Result;
+use kaizen::prelude::*;
+use kaizen::result::Result;
 use example::client;
 use tokio;
 
