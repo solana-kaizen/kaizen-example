@@ -249,7 +249,7 @@ pub mod client {
         tx.execute().await?;
 
         // load created container
-        // there are different "loader" functtions available for loading
+        // there are different "loader" functions available for loading
         // AccountInfos (available via AccountDataReference) and 
         // containers (available via ContainerReferences::<C>)
         // the framework maintains in-application cache, so once loaded, accounts are
