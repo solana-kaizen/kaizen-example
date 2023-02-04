@@ -5,16 +5,14 @@ edition = "2021"
 
 
 [dependencies]
-kaizen = { path = "../../kaizen" }
-example = { path = "../lib" }
-workflow-core = { path = "../../workflow-rs/core" }
-workflow-websocket = { path = "../../workflow-rs/websocket" }
-workflow-rpc = { path = "../../workflow-rs/rpc" }
-workflow-log = { path = "../../workflow-rs/log" }
-async-trait = "0.1.56"
-tokio = { version = "1.20.1", features = ['io-util','time'] }
-clap = { version = "3.2.17", features = ["derive"] }
-thiserror = "1.0.32"
-inventory = "0.2.3"
-cfg-if = "1.0.0"
-
+kaizen.workspace = true
+example.workspace = true
+workflow-core.workspace = true
+workflow-rpc.workspace = true
+workflow-log.workspace = true
+async-trait.workspace = true
+tokio.workspace = true
+clap.workspace = true
+thiserror.workspace = true
+inventory.workspace = true
+cfg-if.workspace = true
