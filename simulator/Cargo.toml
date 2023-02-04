@@ -7,10 +7,10 @@ edition = "2021"
 [dependencies]
 kaizen = { path = "../../kaizen" }
 example = { path = "../lib" }
-workflow-core = { path = "../../workflow-core" }
-workflow-websocket = { path = "../../workflow-websocket" }
-workflow-rpc = { path = "../../workflow-rpc" }
-workflow-log = { path = "../../workflow-log" }
+workflow-core = { path = "../../workflow-rs/core" }
+workflow-websocket = { path = "../../workflow-rs/websocket" }
+workflow-rpc = { path = "../../workflow-rs/rpc" }
+workflow-log = { path = "../../workflow-rs/log" }
 async-trait = "0.1.56"
 tokio = { version = "1.20.1", features = ['io-util','time'] }
 clap = { version = "3.2.17", features = ["derive"] }

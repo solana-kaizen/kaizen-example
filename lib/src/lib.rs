@@ -66,14 +66,14 @@ pub mod program {
         pub pubkey : Pubkey
     }
 
-    impl Into<RecordData> for RecordArgs {
-        fn into(self) -> RecordData {
-            log_trace!("{:?}",self);
+    impl From<RecordArgs> for RecordData {
+        fn from(args: RecordArgs) -> Self {
+            log_trace!("{:?}",args);
             RecordData {
-                int8: self.int8,
-                int32: self.int32,
-                int64: self.int64,
-                pubkey: self.pubkey
+                int8: args.int8,
+                int32: args.int32,
+                int64: args.int64,
+                pubkey: args.pubkey
             }
         }
     }
@@ -166,7 +166,7 @@ pub mod client {
                 .seal()?;
 
             let transaction = Transaction::new_without_accounts(
-                format!("Container test").as_str(),
+                "Container test",//.to_string(),
                 builder.try_into()?
             );
 

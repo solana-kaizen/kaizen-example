@@ -6,10 +6,10 @@ cfg_if! {
         use std::sync::Arc;
         use kaizen::prelude::{AccountData, AccountDataReference};
         use workflow_log::*;
-        use workflow_rpc::asynchronous::server::*;
+        use workflow_rpc::server::prelude::*;
         use kaizen::store::*;
         use kaizen::generate_random_pubkey;
-        use kaizen::emulator::server::Server;
+        use kaizen::emulator::{EmulatorOps,Server};//server::Server;
         use thiserror::Error;
         use clap::{Parser,Subcommand};
         
@@ -76,7 +76,7 @@ cfg_if! {
                     
                     let server = Arc::new(Server::try_new()?);
                     server.init().await?;
-                    let rpc = RpcServer::new(server);
+                    let rpc = RpcServer::new_with_encoding::<Arc<Server>,(),EmulatorOps,Id64>(Encoding::Borsh, server.clone(), server.interface().into());
         
                     let host = host.unwrap_or("127.0.0.1".to_string());
                     let port = port.unwrap_or(9393);

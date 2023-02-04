@@ -8,9 +8,9 @@ edition = "2021"
 crate-type = ["cdylib", "lib"]
 
 [dependencies]
-solana-program = "1.14.1"
-workflow-log = { path = "../../workflow-log" }
-workflow-core = { path = "../../workflow-core" }
+solana-program = "1.14.13"
+workflow-log = { path = "../../workflow-rs/log" }
+workflow-core = { path = "../../workflow-rs/core" }
 kaizen = { path = "../../kaizen" }
 wasm-bindgen = "0.2.79"
 wasm-bindgen-futures = "0.4.29"
