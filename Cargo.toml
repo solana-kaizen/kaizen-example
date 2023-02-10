@@ -20,7 +20,7 @@ inventory = "0.3.3"
 js-sys = "0.3.61"
 kaizen = { path = "../kaizen" }
 rand = "0.8.5"
-solana-program = "1.15.0"
+solana-program = "1.15.1"
 thiserror = "1.0.38"
 tokio = { version = "1.25.0", features = ['io-util','time'] }
 wasm-bindgen = "0.2.84"
