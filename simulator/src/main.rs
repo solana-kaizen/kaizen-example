@@ -20,7 +20,7 @@ cfg_if! {
             #[error("Workflow allocator error: {0}")]
             WorkflowAllocator(String),
             #[error("I/O error: {0}")]
-            IoError(#[from] std::io::Error),
+            Io(#[from] std::io::Error),
         }
 
         impl From<kaizen::error::Error> for Error {

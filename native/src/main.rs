@@ -1,7 +1,6 @@
 use example::client;
 use kaizen::prelude::*;
 use kaizen::result::Result;
-use tokio;
 
 async fn main_impl() -> Result<()> {
     let network = "rpc://127.0.0.1:9393";
@@ -20,7 +19,7 @@ async fn main() -> std::io::Result<()> {
     println!("Hello, world!");
 
     if let Err(err) = main_impl().await {
-        println!("Error: {:?}", err);
+        println!("Error: {err:?}");
     }
 
     Ok(())
