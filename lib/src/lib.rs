@@ -174,7 +174,6 @@ pub mod client {
                 // identity, which retains count of accounts, allowing to create a linear chain
                 // collections - in-container key collections
                 .with_generic_account_templates_with_custom_suffixes(&[&random_seed])
-                // .with_account_templates(1)
                 .with_instruction_data(&data.try_to_vec()?)
                 .seal()?;
 
