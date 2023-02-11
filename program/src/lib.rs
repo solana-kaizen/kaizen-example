@@ -1,1 +1,2 @@
-#[allow(unused_imports)] use example::*;
+#[allow(unused_imports)]
+use example::*;

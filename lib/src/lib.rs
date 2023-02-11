@@ -7,9 +7,8 @@ pub mod program {
 
     // simple program handler with test function
     pub struct ExampleHandler;
-    
-    impl ExampleHandler {
 
+    impl ExampleHandler {
         pub fn test(_ctx: &ContextReference) -> ProgramResult {
             log_trace!("hello handler test");
             Ok(())
@@ -20,34 +19,32 @@ pub mod program {
     // ...declare test function
     // this macro builds a small function table
     // that is accessible program and client-side
-    declare_handlers! (ExampleHandler, [
-        ExampleHandler::test,
-    ]);
-    
+    declare_handlers!(ExampleHandler, [ExampleHandler::test,]);
+
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    
+
     // simple container example
     // this example uses a container, but also
     // demonstrates how static methods on any
     // struct can be used as handler endpoints
 
-    pub enum ContainerTypes{
-        ExampleContainer = 1
+    pub enum ContainerTypes {
+        ExampleContainer = 1,
     }
 
     // data passed to the create() function
     #[derive(Clone, BorshSerialize, BorshDeserialize)]
     pub struct CreationData {
         pub msg: String,
-        pub data : RecordArgs,
+        pub data: RecordArgs,
     }
 
     #[derive(Debug, Clone, Copy, BorshSerialize, BorshDeserialize)]
     pub struct RecordArgs {
-        pub int64 : u64,
-        pub int32 : u32,
-        pub pubkey : Pubkey,
-        pub int8 : u8,
+        pub int64: u64,
+        pub int32: u32,
+        pub pubkey: Pubkey,
+        pub int8: u8,
     }
 
     // please note that this data structure is packed! (repr(packed))
@@ -59,50 +56,44 @@ pub mod program {
     #[derive(Meta, Clone, Copy)]
     #[repr(packed)]
     pub struct RecordData {
-        pub int8 : u8,
-        pub int32 : u32,
-        pub int64 : u64,
-        pub pubkey : Pubkey
+        pub int8: u8,
+        pub int32: u32,
+        pub int64: u64,
+        pub pubkey: Pubkey,
     }
 
     impl From<RecordArgs> for RecordData {
         fn from(args: RecordArgs) -> Self {
-            log_trace!("{:?}",args);
+            log_trace!("{:?}", args);
             RecordData {
                 int8: args.int8,
                 int32: args.int32,
                 int64: args.int64,
-                pubkey: args.pubkey
+                pubkey: args.pubkey,
             }
         }
     }
 
     #[container(ContainerTypes::ExampleContainer)]
-    pub struct ExampleContainer<'info,'refs> {
-        pub message : Utf8String<'info,'refs>,
-        pub records : Array<RecordData,'info,'refs>,
+    pub struct ExampleContainer<'info, 'refs> {
+        pub message: Utf8String<'info, 'refs>,
+        pub records: Array<RecordData, 'info, 'refs>,
     }
 
-    impl<'info,'refs> ExampleContainer<'info,'refs> {
-
+    impl<'info, 'refs> ExampleContainer<'info, 'refs> {
         pub fn test(_ctx: &ContextReference) -> ProgramResult {
             log_trace!("hello container test!");
             Ok(())
         }
 
         pub fn create(ctx: &ContextReference) -> ProgramResult {
-            
             let args = CreationData::try_from_slice(ctx.instruction_data)?;
             let allocation_args = AccountAllocationArgs::default();
 
             // pre-calculate additional data needed for the account to avoid realloc()
             // of the account during the record insert operation
             let extra_data = std::mem::size_of::<RecordData>() + args.msg.as_bytes().len();
-            let container = ExampleContainer::try_allocate(
-                ctx,
-                &allocation_args,
-                extra_data
-            )?;
+            let container = ExampleContainer::try_allocate(ctx, &allocation_args, extra_data)?;
 
             // following operations are unsafe as they may result in segment resizing
             // since various APIs offer direct slice access to segment data, resizing
@@ -117,7 +108,6 @@ pub mod program {
             //      ... this can also be avoided by resizing records_a before taking it's slice
             //
             unsafe {
-                
                 // since we pre-calculated record allocation at container creation phase
                 // we can call try_allocate() that will skip realloc and return mut reference
                 // to what would be a newly allocated element
@@ -136,37 +126,32 @@ pub mod program {
         }
     }
 
-    declare_handlers! (ExampleContainer::<'info,'refs>, [
-        ExampleContainer::test,
-        ExampleContainer::create,
-    ]);
-    
+    declare_handlers!(
+        ExampleContainer::<'info, 'refs>,
+        [ExampleContainer::test, ExampleContainer::create,]
+    );
 }
 
 #[cfg(not(target_os = "solana"))]
 pub mod client {
-    use wasm_bindgen::prelude::*;
-    use kaizen::{utils, result::Result};
     use super::*;
+    use kaizen::{result::Result, utils};
     use std::str::FromStr;
+    use wasm_bindgen::prelude::*;
     pub struct ExampleHandlerClient;
     use rand;
     declare_client!(program::ExampleHandler, ExampleHandlerClient);
 
     impl ExampleHandlerClient {
-
-        pub async fn run_test(
-            authority:&Pubkey,
-        ) -> Result<TransactionList> {
-            let builder = ExampleHandlerClient::execution_context_for(
-                program::ExampleHandler::test
-            )
-                .with_authority(authority)
-                .seal()?;
+        pub async fn run_test(authority: &Pubkey) -> Result<TransactionList> {
+            let builder =
+                ExampleHandlerClient::execution_context_for(program::ExampleHandler::test)
+                    .with_authority(authority)
+                    .seal()?;
 
             let transaction = Transaction::new_without_accounts(
-                "Container test",//.to_string(),
-                builder.try_into()?
+                "Container test", //.to_string(),
+                builder.try_into()?,
             );
 
             Ok(TransactionList::new(vec![transaction]))
@@ -178,10 +163,9 @@ pub mod client {
 
     impl ExampleContainerClient {
         pub async fn create(
-            authority:&Pubkey,
-            data : &program::CreationData
+            authority: &Pubkey,
+            data: &program::CreationData,
         ) -> Result<TransactionList> {
-    
             let random_seed = rand::random::<[u8; 8]>();
             let builder = Self::execution_context_for(program::ExampleContainer::create)
                 .with_authority(authority)
@@ -193,11 +177,11 @@ pub mod client {
                 // .with_account_templates(1)
                 .with_instruction_data(&data.try_to_vec()?)
                 .seal()?;
-    
+
             // there are unspoken rules about create functions always supplying the account
             // they are creating as a first account in the account list (during builder phase)
-            let accounts = builder.gather_accounts(Some(Gather::Authority),None)?;
-    
+            let accounts = builder.gather_accounts(Some(Gather::Authority), None)?;
+
             // transactions by default are lists of transactions containing affecting keys
             // this allows to detect an intersection of the affected accounts and queue
             // transactions that are relevant to one another; the list generated by
@@ -206,9 +190,9 @@ pub mod client {
             let transaction = Transaction::new_with_accounts(
                 format!("Creating example account {}", accounts[0]).as_str(),
                 accounts,
-                builder.try_into()?
+                builder.try_into()?,
             );
-    
+
             Ok(TransactionList::new(vec![transaction]))
         }
     }
@@ -218,14 +202,14 @@ pub mod client {
         let transport = Transport::global()?;
         if let Some(emulator) = transport.emulator() {
             let authority = Pubkey::from_str("42bML5qB3WkMwfa2cosypjUrN7F2PLQm4qhxBdRDyW7f")?;
-            transport.set_custom_authority(
-                Some(authority)
-            )?;
-            emulator.fund(
-                &authority,
-                &Pubkey::default(),
-                utils::sol_to_lamports(500.0)
-            ).await?;
+            transport.set_custom_authority(Some(authority))?;
+            emulator
+                .fund(
+                    &authority,
+                    &Pubkey::default(),
+                    utils::sol_to_lamports(500.0),
+                )
+                .await?;
         }
 
         let authority = transport.get_authority_pubkey()?;
@@ -235,13 +219,13 @@ pub mod client {
 
         let pubkey = Pubkey::from_str("9ZNTfG4NyQgxy2SWjSiQoUyBPEvXT2xo7fKc5hPYYJ7b")?;
         let data = program::CreationData {
-            msg : "hello container".to_string(),
-            data : program::RecordArgs {
-                int8 : 1,
-                int32 : 2,
-                int64 : 3,
-                pubkey
-            }
+            msg: "hello container".to_string(),
+            data: program::RecordArgs {
+                int8: 1,
+                int32: 2,
+                int64: 3,
+                pubkey,
+            },
         };
         let tx = client::ExampleContainerClient::create(&authority, &data).await?;
         let target_account_pubkey = tx.target_account()?;
@@ -249,13 +233,13 @@ pub mod client {
 
         // load created container
         // there are different "loader" functions available for loading
-        // AccountInfos (available via AccountDataReference) and 
+        // AccountInfos (available via AccountDataReference) and
         // containers (available via ContainerReferences::<C>)
         // the framework maintains in-application cache, so once loaded, accounts are
         // available for the duration of runtime and need to be "reloaded" if one wants
         // to refresh their contents.
         // When fetching accounts, multiple lookups for the same account are fine as the future
-        // will stall and wait if it detects an already ongoing lookup for the same pubkey. 
+        // will stall and wait if it detects an already ongoing lookup for the same pubkey.
         let container = load_container::<program::ExampleContainer>(&target_account_pubkey)
             .await?
             .expect("¯\\_(ツ)_/¯");
@@ -269,28 +253,27 @@ pub mod client {
 
         log_trace!("container data - message: {message} int8: {int8} int32: {int32} int64: {int64} pubkey: {incoming_pubkey}");
 
-        assert_eq!(int8,1);
-        assert_eq!(int32,2);
-        assert_eq!(int64,3);
-        assert_eq!(pubkey,incoming_pubkey);
+        assert_eq!(int8, 1);
+        assert_eq!(int32, 2);
+        assert_eq!(int64, 3);
+        assert_eq!(pubkey, incoming_pubkey);
 
         Ok(())
     }
-
 }
 
 #[cfg(test)]
 pub mod tests {
     use super::*;
-    use std::str::FromStr;
     use kaizen::result::Result;
+    use std::str::FromStr;
 
     #[async_std::test]
     async fn example_test() -> Result<()> {
         // Workflow Allocator framework needs to be initialized client-side
         // initialization builds a local program registry and container registry
         // program registry allows the transport to map different entry points
-        // (you can have multiple entry points, just make sure to expose only 
+        // (you can have multiple entry points, just make sure to expose only
         // one to the program) and container registry maps container lookup tables
         // these are done differently in native and wasm.
         kaizen::init()?;
@@ -308,20 +291,21 @@ pub mod tests {
         //
         Transport::try_new_for_unit_tests(
             crate::program_id(),
-            Some(Pubkey::from_str("42bML5qB3WkMwfa2cosypjUrN7F2PLQm4qhxBdRDyW7f")?),
-            TransportConfig::default()
-        ).await?;
+            Some(Pubkey::from_str(
+                "42bML5qB3WkMwfa2cosypjUrN7F2PLQm4qhxBdRDyW7f",
+            )?),
+            TransportConfig::default(),
+        )
+        .await?;
 
         client::run_example().await?;
 
         Ok(())
     }
-
 }
 
-
-declare_program!("example", "5UAQGzYRWKEgdbpZCqoUjKDKiWpNbHeataWknRpvswEH",[
-    program::ExampleHandler,
-    program::ExampleContainer,
-]); 
-
+declare_program!(
+    "example",
+    "5UAQGzYRWKEgdbpZCqoUjKDKiWpNbHeataWknRpvswEH",
+    [program::ExampleHandler, program::ExampleContainer,]
+);

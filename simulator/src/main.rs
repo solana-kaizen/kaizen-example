@@ -12,7 +12,7 @@ cfg_if! {
         use kaizen::emulator::{EmulatorOps,Server};//server::Server;
         use thiserror::Error;
         use clap::{Parser,Subcommand};
-        
+
         #[derive(Debug, Error)]
         enum Error {
             #[error("WebSocket error: {0}")]
@@ -22,24 +22,24 @@ cfg_if! {
             #[error("I/O error: {0}")]
             IoError(#[from] std::io::Error),
         }
-        
+
         impl From<kaizen::error::Error> for Error {
             fn from(error: kaizen::error::Error) -> Self {
                 Error::WorkflowAllocator(error.to_string())
             }
         }
-        
+
         #[derive(Debug, Parser)]
         struct Args {
             #[clap(subcommand)]
             action : Action
         }
-        
+
         #[derive(Subcommand, Debug)]
         enum Action {
-            Service { 
+            Service {
                 #[clap(long)]
-                host : Option<String>, 
+                host : Option<String>,
                 #[clap(long)]
                 port : Option<u16>,
                 #[clap(long)]
@@ -49,12 +49,12 @@ cfg_if! {
             Purge,
             List,
         }
-        
-        
-        
+
+
+
         #[tokio::main]
         async fn main() -> Result<(),Error> {
-        
+
             let args = Args::parse();
             match args.action {
                 Action::Service { host, port, purge } => {
@@ -62,7 +62,7 @@ cfg_if! {
                     if purge {
                         println!();
                         log_info!("Purging all accounts at: {}",FileStore::default_data_folder().into_os_string().into_string().unwrap());
-                        std::fs::remove_dir_all(FileStore::default_data_folder())?;    
+                        std::fs::remove_dir_all(FileStore::default_data_folder())?;
                     }
 
                     println!();
@@ -73,11 +73,11 @@ cfg_if! {
                     kaizen::container::registry::list_containers()?;
                     // ~~~~~~~~~~~~~~~~~~~~~~~~~
                     println!();
-                    
+
                     let server = Arc::new(Server::try_new()?);
                     server.init().await?;
                     let rpc = RpcServer::new_with_encoding::<Arc<Server>,(),EmulatorOps,Id64>(Encoding::Borsh, server.clone(), server.interface().into());
-        
+
                     let host = host.unwrap_or("127.0.0.1".to_string());
                     let port = port.unwrap_or(9393);
 
@@ -89,7 +89,7 @@ cfg_if! {
                     let store = FileStore::try_new()?;
                     let account_data = AccountData::new_static(generate_random_pubkey(),generate_random_pubkey());
                     let reference = Arc::new(AccountDataReference::new(account_data));
-                    store.store(&reference).await?;        
+                    store.store(&reference).await?;
                 },
                 Action::Purge => {
                     println!();
@@ -103,7 +103,7 @@ cfg_if! {
                     store.list().await?.to_log();
                 }
             }
-        
+
             Ok(())
         }
     } else {
