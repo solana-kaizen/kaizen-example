@@ -37,46 +37,33 @@ sh -c "$(curl -sSfL https://release.solana.com/v1.14.7/install)"
 
 ## Dependencies
 
-IMPORTANT:
-
-The dependencies of Solana Kaizen are not currently published to crates.io or are
-out of date.  To setup a development environment, you need to clone its dependencies
-manually or use [Emanator](https://github.com/aspectron/cargo-emanate)
-
-This will be addressed in the coming weeks.
-
-### Deploying via Emanator
-
-To deploy this example using Emanator, you need to have a functional command-line `git` and run the following:
-
-```
-cargo install cargo-emanate
-git clone https://github.com/solana-kaizen/solana-kaizen-example-dev
-cd solana-kaizen-example-dev
-cargo emanate sync
-cd solana-kaizen-example-dev/solana-kaizen-example
-```
+The project is not currently published on crates.io (it will be in the coming weeks) as such, to build it
+you need to clone the following repositories in the same folder:
+- https://github.com/solana-kaizen/kaizen
+- https://github.com/solana-kaizen/solana-web3-sys
+- https://github.com/workflow-rs/workflow-rs
 
 ### Running
 
 Following this you can build subfolders as follows:
 * `native` (native client execution) - `cargo run`
 * `wasm` (web-browser client; see below) - `./build`
-* `program` (program for solana deployment) - `cargo build-bpf`
+* `program` (program for solana deployment) - `cargo build-sbf`
 * `simulator` (simulator server) - `cargo run`
 * `lib` (unit tests) - `cargo test example_test -- --nocapture`
+
+NOTE: `program` also has a `deploy` script that uses the included demo key that produces a matching program id.
 
 To access WASM target, you can use any web server from the `root` folder.
 
 For example:
 ```
-cargo install simple-http-server
+cargo install basic-http-server
 cd root
-simple-http-server
+basic-http-server
 ```
-Following that, access http://localhost:8000/index.html and open the browser developer console to see application output logs.
+Following that, access http://localhost:4000/index.html and open the browser developer console to see application output logs.
 
 Please note: Current implementation of the example, does not connect to the in-browser wallet, such as phantom
-as this example was quickly put together to demonstrate the functionality of the framework, it does not have 
+as this example was quickly put together to demonstrate the general functionality of the framework, it does not have 
 any user interface.  The example of interfacing with wallet adapters will be done at a later date.
-
