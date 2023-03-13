@@ -25,7 +25,10 @@ thiserror = "1.0.38"
 tokio = { version = "1.25.0", features = ['io-util','time'] }
 wasm-bindgen = "0.2.84"
 wasm-bindgen-futures = "0.4.34"
-workflow-core = { path = "../workflow-rs/core" }
-workflow-log = { path = "../workflow-rs/log" }
-workflow-rpc = { path = "../workflow-rs/rpc" }
+# workflow-core = { path = "../workflow-rs/core" }
+# workflow-log = { path = "../workflow-rs/log" }
+# workflow-rpc = { path = "../workflow-rs/rpc" }
+workflow-core = "0.3.12"
+workflow-log = "0.3.12"
+workflow-rpc = "0.3.12"
 example = { path = "lib" }

@@ -8,7 +8,7 @@ cfg_if! {
         use workflow_log::*;
         use workflow_rpc::server::prelude::*;
         use kaizen::store::*;
-        use kaizen::utils::generate_random_pubkey;
+        use kaizen::pubkey::generate_random_pubkey;
         use kaizen::emulator::{EmulatorOps,Server};//server::Server;
         use thiserror::Error;
         use clap::{Parser,Subcommand};
